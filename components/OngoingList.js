@@ -12,7 +12,7 @@ function Down() {
 }
 
 async function showurl() {
-  const path = `/users/6L9vVwXu0TNOI6reyvx8lsRmCUQ2/src/src.mp4`;
+  const path = `/users/6L9vVwXu0TNOI6reyvx8lsRmCUQ2/0ba1d295b8fbb4897daf70094257a6/src/src.mp4`;
   const url = await firebase.storage().ref(path).getDownloadURL();
   console.log(url);
   FileSystem.downloadAsync(url, FileSystem.documentDirectory + "sample.mp4")
@@ -41,6 +41,7 @@ export default OngoingList = ({ list }) => {
             style={styles.downloadbutton}
             onPress={() => {
               Down();
+              showurl();
             }}
           >
             <AntDesign name="clouddownloado" size={28} color={colors.white} />

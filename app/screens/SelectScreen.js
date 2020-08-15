@@ -18,6 +18,7 @@ import firebase from "firebase";
 import "firebase/firestore";
 import Constants from "expo-constants";
 import axios from "axios";
+import { getFreeDiskStorageAsync } from "expo-file-system";
 
 export default class SelectScreen extends React.Component {
   constructor(props) {
@@ -25,6 +26,7 @@ export default class SelectScreen extends React.Component {
     this.state = {
       output: null,
       uid: null,
+      rrid: null,
       ImageSource: null,
       videoSource: null,
     };
@@ -38,14 +40,22 @@ export default class SelectScreen extends React.Component {
     });
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     this.getPermissionAsync();
-    var user = firebase.auth().currentUser;
-    if (user != null) {
-      this.setState({
-        uid: user.uid,
-      });
-    }
+    this.focusListener = this.props.navigation.addListener(
+      "focus",
+      async () => {
+        var user = firebase.auth().currentUser;
+        if (user != null) {
+          await this.setState({
+            uid: user.uid,
+          });
+        }
+        await this.getrid();
+        console.log(this.state.uid);
+        console.log(this.state.rrid);
+      }
+    );
   }
 
   getPermissionAsync = async () => {
@@ -58,7 +68,8 @@ export default class SelectScreen extends React.Component {
   };
 
   uploadPhotoAsync = async (uri) => {
-    const path = `7.jpg`;
+    const path =
+      "users/" + this.state.uid + "/" + this.state.rrid + "/src/src.mp4";
     return new Promise(async (res, rej) => {
       const response = await fetch(uri);
       const blobb = await response.blob();
@@ -80,7 +91,8 @@ export default class SelectScreen extends React.Component {
   };
 
   uploadVideoAsync = async (uri) => {
-    const path = `8.mp4`;
+    const path =
+      "users/" + this.state.uid + "/" + this.state.rrid + "/dst/dst.mp4";
     return new Promise(async (res, rej) => {
       const response = await fetch(uri);
       const blobb = await response.blob();
@@ -104,13 +116,14 @@ export default class SelectScreen extends React.Component {
   _pickImage = async () => {
     try {
       let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
         allowsEditing: true,
         aspect: [4, 3],
         quality: 1,
       });
       if (!result.cancelled) {
         this.setState({ ImageSource: result.uri });
+        this.uploadPhotoAsync(this.state.ImageSource);
       }
 
       console.log(result);
@@ -129,6 +142,7 @@ export default class SelectScreen extends React.Component {
       });
       if (!result.cancelled) {
         this.setState({ videoSource: result.uri });
+        this.uploadVideoAsync(this.state.videoSource);
       }
 
       console.log(result);
@@ -176,25 +190,26 @@ export default class SelectScreen extends React.Component {
       });
   }
 
-  conNsub() {
-    /*
+  async getrid() {
     axios({
-      method: "get",
-      url: "http://31dbfda3f3bf.ngrok.io/media/",
-      params: {
-        uid: "Seunghyuk",
-        rid: "452637",
-        request: "result",
-        filename: "output.mp4",
+      method: "post",
+      url: "http://5aa8bdd6cbb1.ngrok.io/users/",
+      data: {
+        uid: this.state.uid,
       },
     })
-      .then(function (response) {
-        console.log(response);
+      .then((response) => {
+        this.setState({
+          rrid: response.data.rid,
+        });
+        console.log(response.data.rid);
       })
       .catch(function (error) {
         console.log(error);
       });
-      */
+  }
+
+  conNsub() {
     //this.uploadPhotoAsync(this.state.ImageSource);
     //this.uploadVideoAsync(this.state.videoSource);
     //this.props.navigation.navigate("Main");
@@ -222,13 +237,15 @@ export default class SelectScreen extends React.Component {
             { borderBottomColor: this.state.color },
           ]}
         >
-          <Image
+          <Video
             source={{ uri: this.state.ImageSource }}
-            style={{
-              width: "70%",
-              height: 150,
-              marginLeft: 50,
-            }}
+            rate={1.0}
+            volume={1.0}
+            isMuted={false}
+            resizeMode="cover"
+            shouldPlay
+            isLooping
+            style={{ width: "70%", height: 150, marginLeft: 50 }}
           />
           <TouchableOpacity
             style={[styles.selectbutton, { backgroundColor: this.state.color }]}
