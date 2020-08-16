@@ -9,7 +9,6 @@ export default class OngoingScreen extends React.Component {
   constructor(props) {
     super(props);
     var user = firebase.auth().currentUser;
-    this.getd = this.getd.bind(this);
     this.state = {
       datalist: [],
       uid: user.uid,

@@ -17,7 +17,9 @@ import firebase from "firebase";
 import "firebase/firestore";
 import Constants from "expo-constants";
 import axios from "axios";
+import { LinearGradient } from "expo-linear-gradient";
 import { getFreeDiskStorageAsync } from "expo-file-system";
+import { DarkTheme } from "@react-navigation/native";
 
 export default class SelectScreen extends React.Component {
   constructor(props) {
@@ -81,7 +83,9 @@ export default class SelectScreen extends React.Component {
       "users/" + this.state.uid + "/" + this.state.rrid + "/src/src.mp4";
     const response = await fetch(uri);
     const blobb = await response.blob();
-
+    this.setState({
+      srccanselect: false,
+    });
     await firebase.storage().ref(path).put(blobb);
     return;
   };
@@ -93,6 +97,9 @@ export default class SelectScreen extends React.Component {
     const blobb = await response.blob();
 
     await firebase.storage().ref(path).put(blobb);
+    this.setState({
+      dstcanselect: false,
+    });
     return;
   };
 
@@ -107,8 +114,10 @@ export default class SelectScreen extends React.Component {
       if (!result.cancelled) {
         this.setState({
           srcVidsource: result.uri,
+          srccanselect: false,
           dstcanselect: false,
-          dstbuttontext: "waiting for source Video to upload",
+          srcbuttontext: "Checking your Video's Safety",
+          dstbuttontext: "You can upload after checking Safety",
         });
         await this.uploadsrcVidAsync(this.state.srcVidsource);
         axios({
@@ -124,7 +133,6 @@ export default class SelectScreen extends React.Component {
           .then((response) => {
             this.setState({
               srcVidcheck: response.data,
-              srcbuttontext: "waiting for Destination Video to upload",
               dstbuttontext: "Select Destination Video",
               srccanselect: false,
               dstcanselect: true,
@@ -132,10 +140,18 @@ export default class SelectScreen extends React.Component {
             if (response.data.status === "Safe") {
               this.setState({
                 srcok: true,
+                srcbuttontext: "Your Video is Safe!",
               });
             } else {
               this.setState({
                 srcok: false,
+                srcbuttontext: "Your Video is Unsafe, choose other Video",
+              });
+            }
+            if (this.state.srcok) {
+              this.setState({
+                srccanselect: false,
+                srcbuttontext: "Your Video is Safe!",
               });
             }
             if (this.state.srcok && this.state.dstok) {
@@ -168,7 +184,8 @@ export default class SelectScreen extends React.Component {
         this.setState({
           dstVidsource: result.uri,
           srccanselect: false,
-          srcbuttontext: "waiting for source Video to upload",
+          dstcanselect: false,
+          dstbuttontext: "Checking your Video's Safety",
         });
         await this.uploaddstVidAsync(this.state.dstVidsource);
         axios({
@@ -184,18 +201,27 @@ export default class SelectScreen extends React.Component {
           .then((response) => {
             this.setState({
               dstVidcheck: response.data,
-              srcbuttontext: "Select Source Video",
-              dstbuttontext: "waiting for source Video to upload",
-              srccanselect: true,
-              dstcanselect: false,
             });
             if (response.data.status === "Safe") {
               this.setState({
                 dstok: true,
+                dstbuttontext: "Your Video is Safe!",
               });
             } else {
               this.setState({
                 dstok: false,
+                dstbuttontext: "Your Video is Unsafe, choose other Video",
+              });
+            }
+            if (!this.state.srcok) {
+              this.setState({
+                srccanselect: true,
+              });
+            }
+            if (this.state.dstok) {
+              this.setState({
+                dstcanselect: false,
+                dstbuttontext: "Your Video is Safe!",
               });
             }
             if (this.state.srcok && this.state.dstok) {
@@ -269,7 +295,7 @@ export default class SelectScreen extends React.Component {
       .catch(function (error) {
         console.log(error);
       });
-    this.props.navigation.navigate("Main");
+    this.props.navigation.navigate("MainPage");
     //this.getd();
   }
 
@@ -313,11 +339,18 @@ export default class SelectScreen extends React.Component {
               resizeMode="cover"
               shouldPlay
               isLooping
-              style={{ width: "70%", height: 150, marginLeft: 50 }}
+              style={{
+                width: "80%",
+                height: 160,
+                marginHorizontal: 30,
+                marginBottom: 10,
+              }}
             />
+
             <Button
               title={this.state.srcbuttontext}
               disabled={!this.state.srccanselect}
+              color="#2D31AC"
               onPress={() => {
                 this._picksrcVid();
               }}
@@ -332,11 +365,17 @@ export default class SelectScreen extends React.Component {
               resizeMode="cover"
               shouldPlay
               isLooping
-              style={{ width: "70%", height: 150, marginLeft: 50 }}
+              style={{
+                width: "80%",
+                height: 160,
+                marginHorizontal: 30,
+                marginBottom: 10,
+              }}
             />
             <Button
               title={this.state.dstbuttontext}
               disabled={!this.state.dstcanselect}
+              color="#2D31AC"
               onPress={() => {
                 this._pickdstVid();
               }}
@@ -365,7 +404,7 @@ export default class SelectScreen extends React.Component {
             <TextInput
               style={[styles.input, { borderColor: this.state.color }]}
               onChangeText={this.handleoutputname}
-              placeholder="Output file name"
+              placeholder="Example.mp4"
             />
             <Button
               title="Convert"
@@ -505,5 +544,18 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: "center",
     justifyContent: "center",
+  },
+  buttonL: {
+    borderWidth: 1,
+    height: 50,
+    //borderColor: colors.c3,
+    marginTop: 15,
+    marginHorizontal: 40,
+    marginBottom: 30,
+    borderRadius: 30,
+    alignItems: "center",
+    alignContent: "center",
+    justifyContent: "center",
+    alignSelf: "stretch",
   },
 });

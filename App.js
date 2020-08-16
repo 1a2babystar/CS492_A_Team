@@ -9,6 +9,7 @@ import LoginScreen from "./app/screens/LoginScreen";
 import CreateScreen from "./app/screens/CreateScreen";
 import Intro from "./app/screens/Intro";
 import Mainpage from "./app/screens/Mainpage";
+import HistoryScreen from "./app/screens/HistoryScreen";
 
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -46,6 +47,7 @@ export default class App extends React.Component {
           <Main.Screen name="Ongoing" component={OngoingScreen} />
           <Main.Screen name="MainPage" component={Mainpage} />
           <Main.Screen name="Profile" component={ProfileScreen} />
+          <Main.Screen name="History" component={HistoryScreen} />
         </Main.Navigator>
       </NavigationContainer>
     );

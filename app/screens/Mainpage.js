@@ -51,7 +51,14 @@ export default class Mainpage extends Component {
         </View>
         <View style={styles.bottomlayer}>
           <View style={styles.big_rectangle}>
-            <Text style={styles.history}>History</Text>
+            <Text
+              style={styles.history}
+              onPress={() => {
+                this.props.navigation.navigate("History");
+              }}
+            >
+              History
+            </Text>
             <Text style={styles.num}> number of request </Text>
           </View>
           <TouchableOpacity

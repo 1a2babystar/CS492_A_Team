@@ -7,14 +7,30 @@ import firebase from "firebase";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 
-async function Down(uid, rid) {
-  const path = "/users/" + uid + "/" + rid + "/result/test.mp4";
+async function Down(uid, rid, name) {
+  const path = "/users/" + uid + "/" + rid + "/result/out.mp4";
   const url = await firebase.storage().ref(path).getDownloadURL();
-  console.log(url);
-  FileSystem.downloadAsync(url, FileSystem.documentDirectory + "sample.mp4")
-    .then(({ uri }) => {
+  FileSystem.downloadAsync(url, FileSystem.documentDirectory + name)
+    .then(async ({ uri }) => {
       MediaLibrary.saveToLibraryAsync(uri);
       alert("Download Finished, Check the gallery");
+      await firebase
+        .firestore()
+        .collection("users")
+        .doc(uid)
+        .collection("rid")
+        .doc(rid)
+        .delete()
+        .then(() => {
+          console.log("storage delete success!");
+        });
+      await firebase
+        .firestore()
+        .collection("users")
+        .doc(uid)
+        .collection("history")
+        .doc(rid)
+        .setdata({ name: name });
     })
     .catch((error) => {
       console.error(error);
@@ -36,7 +52,7 @@ export default OngoingList = ({ list }) => {
           <TouchableOpacity
             style={styles.downloadbutton}
             onPress={() => {
-              Down(list.uid, list.rid);
+              Down(list.uid, list.rid, list.name);
             }}
           >
             <AntDesign name="clouddownloado" size={28} color={colors.white} />
