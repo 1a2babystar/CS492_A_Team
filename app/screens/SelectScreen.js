@@ -297,7 +297,7 @@ export default class SelectScreen extends React.Component {
           <TouchableOpacity
             style={styles.backbutton}
             onPress={() => {
-              this.props.navigation.navigate("Main");
+              this.props.navigation.navigate("MainPage");
             }}
           >
             <View style={styles.titleBar}>

@@ -43,7 +43,7 @@ export default class LoginScreen extends React.Component {
           error: "",
           loading: false,
         });
-        this.props.navigation.navigate("TabNavigator");
+        this.props.navigation.navigate("MainPage");
       })
       .catch((e) => {
         this.setState({

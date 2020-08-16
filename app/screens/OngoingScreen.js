@@ -2,13 +2,8 @@ import React from "react";
 import { StyleSheet, Text, View, FlatList, Button } from "react-native";
 import colors from "../config/colors";
 import clr from "../config/clr";
-import tempData from "./tempData";
 import OngoingList from "../../components/OngoingList";
 import firebase from "firebase";
-
-for (var i = 0; i < tempData.length; i++) {
-  tempData[i]["color"] = clr[i % 7];
-}
 
 export default class OngoingScreen extends React.Component {
   constructor(props) {
