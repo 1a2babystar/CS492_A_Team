@@ -1,11 +1,20 @@
 import React from "react";
-import { StyleSheet, View, Button, TouchableOpacity, Text } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Button,
+  TouchableOpacity,
+  Text,
+  KeyboardAvoidingView,
+  ScrollView,
+} from "react-native";
 import colors from "../config/colors";
 import firebase from "firebase";
 import { TextInput } from "react-native-gesture-handler";
 import Fontisto from "react-native-vector-icons/Fontisto";
 import Entypo from "react-native-vector-icons/Entypo";
 import AntDesign from "react-native-vector-icons/AntDesign";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default class CreateScreen extends React.Component {
   constructor(props) {
@@ -74,83 +83,96 @@ export default class CreateScreen extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <TouchableOpacity
-          style={styles.backbutton}
-          onPress={() => {
-            this.props.navigation.navigate("Login");
-          }}
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          //behavior="padding"
+          enabled={true}
         >
-          <View style={styles.titleBar}>
-            <AntDesign name="back" size={28} color="#52575D" />
-          </View>
-        </TouchableOpacity>
-        <View style={styles.Theme}>
-          <Text style={styles.Title}>Create Account</Text>
-        </View>
-        <View style={styles.form}>
-          <View style={styles.inputtogether}>
-            <Fontisto
-              style={{
-                flex: 1,
-                marginTop: 8,
-                marginLeft: 10,
-              }}
-              name="email"
-              size={35}
-              color="#719AFE"
-            />
-            <TextInput
-              style={styles.tinput}
-              autoCompleteType="email"
-              placeholder="email"
-              onChangeText={this.handleChangeemail}
-            ></TextInput>
-          </View>
-          <View style={styles.inputtogether}>
-            <Entypo
-              style={{
-                flex: 1,
-                marginTop: 8,
-                marginLeft: 10,
-              }}
-              name="lock"
-              size={35}
-              color="#719AFE"
-            />
-            <TextInput
-              style={styles.tinput}
-              secureTextEntry
-              placeholder="password"
-              onChangeText={this.handleChangepassword}
-            ></TextInput>
-          </View>
-          <View style={styles.inputtogether}>
-            <Entypo
-              style={{
-                flex: 1,
-                marginTop: 8,
-                marginLeft: 10,
-              }}
-              name="lock"
-              size={35}
-              color="#719AFE"
-            />
-            <TextInput
-              style={styles.tinput}
-              secureTextEntry
-              placeholder="password confirm"
-              onChangeText={this.handleChangePasswordConfirm}
-            ></TextInput>
-          </View>
-          <TouchableOpacity
-            style={styles.buttonS}
-            onPress={() => {
-              this.OnSignUpPress();
-            }}
-          >
-            <Text>Create</Text>
-          </TouchableOpacity>
-        </View>
+          <ScrollView style={styles.background}>
+            <View style={styles.Theme}>
+              <Text style={styles.Title}>Let's Sign Up</Text>
+              <Text style={styles.SubTitle}>
+                {" "}
+                Register Our Service, Enjoy FaceSwap!
+              </Text>
+            </View>
+            <View style={styles.form}>
+              <Text style={styles.inputinfo}>User Email</Text>
+              <View style={styles.inputtogether}>
+                <Fontisto
+                  style={{
+                    flex: 1,
+                    marginTop: 13,
+                    marginLeft: 10,
+                  }}
+                  name="person"
+                  size={25}
+                  color="black"
+                />
+                <TextInput
+                  style={styles.tinput}
+                  autoCompleteType="email"
+                  placeholder=""
+                  onChangeText={this.handleChangeemail}
+                ></TextInput>
+              </View>
+              <Text style={styles.inputinfo}>Password</Text>
+              <View style={styles.inputtogether}>
+                <Entypo
+                  style={{
+                    flex: 1,
+                    marginTop: 13,
+                    marginLeft: 10,
+                  }}
+                  name="lock"
+                  size={25}
+                  color="black"
+                />
+                <TextInput
+                  style={styles.tinput}
+                  secureTextEntry
+                  placeholder=""
+                  onChangeText={this.handleChangepassword}
+                ></TextInput>
+              </View>
+              <Text style={styles.inputinfo}>Confirm Password</Text>
+              <View style={styles.inputtogether}>
+                <Entypo
+                  style={{
+                    flex: 1,
+                    marginTop: 13,
+                    marginLeft: 10,
+                  }}
+                  name="lock"
+                  size={25}
+                  color="black"
+                />
+                <TextInput
+                  style={styles.tinput}
+                  secureTextEntry
+                  placeholder=""
+                  onChangeText={this.handleChangePasswordConfirm}
+                ></TextInput>
+              </View>
+              <View style={styles.signup_button}>
+                <TouchableOpacity
+                  onPress={() => {
+                    this.OnSignUpPress();
+                  }}
+                >
+                  <LinearGradient
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    colors={["#cc2b5e", "#753a88"]}
+                    style={styles.buttonL}
+                  >
+                    <Text style={styles.signin}>Sign Up</Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </View>
     );
   }
@@ -159,16 +181,30 @@ export default class CreateScreen extends React.Component {
 const styles = StyleSheet.create({
   Title: {
     color: "black",
-    fontSize: 30,
-    fontWeight: "100",
-    fontWeight: "bold",
+    //fontWeight: "100",
+    paddingTop: 20,
+    marginTop: 20,
+    marginLeft: 20,
+    paddingBottom: 20,
+    fontSize: 35,
+  },
+  SubTitle: {
+    //paddingTop: 20,
+    marginLeft: 18,
+    paddingBottom: 20,
+    fontSize: 15,
+    color: "gray",
+    marginBottom: 80,
   },
   Theme: {
-    flex: 1,
+    flex: 1.5,
     top: 70,
-    alignItems: "center",
+    //alignItems: "center",
+    marginTop: 10,
+    marginBottom: 30,
   },
   backbutton: {
+    marginTop: 30,
     flex: 1,
     position: "absolute",
     top: 20,
@@ -190,6 +226,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "500",
   },
+  inputinfo: {
+    color: "gray",
+    marginLeft: 25,
+    fontSize: 15,
+  },
   button: {
     marginTop: 32,
     backgroundColor: "#FFF",
@@ -200,14 +241,13 @@ const styles = StyleSheet.create({
   },
   inputtogether: {
     flexDirection: "row",
-    borderWidth: 1,
+    borderBottomColor: "gray",
+    borderBottomWidth: 1,
     backgroundColor: "white",
-    borderColor: "#719AFE",
-    marginVertical: 15,
     marginHorizontal: 20,
-    borderRadius: 30,
     padding: 1,
     alignSelf: "stretch",
+    marginBottom: 30,
   },
   form: {
     flex: 15,
@@ -216,15 +256,17 @@ const styles = StyleSheet.create({
   tinput: {
     flex: 6,
     marginVertical: 5,
-    marginRight: 5,
+    marginLeft: 10,
     height: 40,
     color: "#719AFE",
     borderColor: colors.r1,
-    borderRadius: 4,
-    padding: 12,
-    alignItems: "center",
+    padding: 3,
     justifyContent: "center",
     alignSelf: "stretch",
+  },
+  signin: {
+    fontSize: 20,
+    color: "white",
   },
   buttonS: {
     height: 50,
@@ -235,6 +277,19 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     padding: 16,
     alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "stretch",
+  },
+  buttonL: {
+    borderWidth: 1,
+    height: 50,
+    //borderColor: colors.c3,
+    marginTop: 15,
+    marginHorizontal: 40,
+    marginBottom: 30,
+    borderRadius: 30,
+    alignItems: "center",
+    alignContent: "center",
     justifyContent: "center",
     alignSelf: "stretch",
   },

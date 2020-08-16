@@ -14,6 +14,7 @@ export default class OngoingScreen extends React.Component {
   constructor(props) {
     super(props);
     var user = firebase.auth().currentUser;
+    this.getd = this.getd.bind(this);
     this.state = {
       datalist: [],
       uid: user.uid,
@@ -23,31 +24,36 @@ export default class OngoingScreen extends React.Component {
     this.focusListener = this.props.navigation.addListener(
       "focus",
       async () => {
-        await this.readdb();
-        for (var i = 0; i < tempData.length; i++) {
-          tempData[i]["color"] = clr[i % 7];
-        }
+        await this.getd();
       }
     );
   }
-  async readdb() {
-    var path = this.state.uid;
-    await firebase
-      .database()
-      .ref(path)
-      .once("value")
-      .then(async (snapshot) => {
-        var fl = [];
-        var OB = Object.entries(snapshot.val());
-        for (var i = 0; i < OB.length; i++) {
-          OB[i][1]["color"] = clr[i % 7];
-          fl.push(OB[i][1]);
-        }
-        await this.setState({
-          datalist: fl,
+  async getd() {
+    const dbh = firebase.firestore();
+    var arr = [];
+    dbh
+      .collection("users")
+      .doc(this.state.uid)
+      .collection("rid")
+      .get()
+      .then((querySnapshot) => {
+        querySnapshot.forEach(function (doc) {
+          doc.data()["color"] = clr[1];
+          arr.push(doc.data());
         });
+        for (var i = 0; i < arr.length; i++) {
+          arr[i]["color"] = clr[i % 7];
+        }
+        this.setState({
+          datalist: arr,
+        });
+        console.log(this.state.datalist);
+      })
+      .catch(function (error) {
+        console.log("Error getting documents: ", error);
       });
   }
+
   render() {
     return (
       <View style={styles.container}>

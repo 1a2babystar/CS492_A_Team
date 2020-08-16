@@ -4,7 +4,6 @@ import {
   TouchableOpacity,
   Text,
   View,
-  Image,
   TextInput,
   KeyboardAvoidingView,
   Button,
@@ -27,8 +26,18 @@ export default class SelectScreen extends React.Component {
       output: null,
       uid: null,
       rrid: null,
-      ImageSource: null,
-      videoSource: null,
+      srcVidsource: null,
+      dstVidsource: null,
+      selectscreen: true,
+      srcVidcheck: null,
+      dstVidcheck: null,
+      srcok: false,
+      dstok: false,
+      sendok: false,
+      srccanselect: true,
+      dstcanselect: true,
+      srcbuttontext: "Select Source Video",
+      dstbuttontext: "Select Destination Video",
     };
 
     this.handleoutputname = this.handleoutputname.bind(this);
@@ -67,53 +76,27 @@ export default class SelectScreen extends React.Component {
     }
   };
 
-  uploadPhotoAsync = async (uri) => {
+  uploadsrcVidAsync = async (uri) => {
     const path =
       "users/" + this.state.uid + "/" + this.state.rrid + "/src/src.mp4";
-    return new Promise(async (res, rej) => {
-      const response = await fetch(uri);
-      const blobb = await response.blob();
+    const response = await fetch(uri);
+    const blobb = await response.blob();
 
-      let upload = firebase.storage().ref(path).put(blobb);
-
-      upload.on(
-        "state_changed",
-        (snapshot) => {},
-        (err) => {
-          rej(err);
-        },
-        async () => {
-          const url = await upload.snapshot.ref.getDownloadURL();
-          res(url);
-        }
-      );
-    });
+    await firebase.storage().ref(path).put(blobb);
+    return;
   };
 
-  uploadVideoAsync = async (uri) => {
+  uploaddstVidAsync = async (uri) => {
     const path =
       "users/" + this.state.uid + "/" + this.state.rrid + "/dst/dst.mp4";
-    return new Promise(async (res, rej) => {
-      const response = await fetch(uri);
-      const blobb = await response.blob();
+    const response = await fetch(uri);
+    const blobb = await response.blob();
 
-      let upload = firebase.storage().ref(path).put(blobb);
-
-      upload.on(
-        "state_changed",
-        (snapshot) => {},
-        (err) => {
-          rej(err);
-        },
-        async () => {
-          const url = await upload.snapshot.ref.getDownloadURL();
-          res(url);
-        }
-      );
-    });
+    await firebase.storage().ref(path).put(blobb);
+    return;
   };
 
-  _pickImage = async () => {
+  _picksrcVid = async () => {
     try {
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Videos,
@@ -122,8 +105,49 @@ export default class SelectScreen extends React.Component {
         quality: 1,
       });
       if (!result.cancelled) {
-        this.setState({ ImageSource: result.uri });
-        this.uploadPhotoAsync(this.state.ImageSource);
+        this.setState({
+          srcVidsource: result.uri,
+          dstcanselect: false,
+          dstbuttontext: "waiting for source Video to upload",
+        });
+        await this.uploadsrcVidAsync(this.state.srcVidsource);
+        axios({
+          method: "post",
+          url: "http://5aa8bdd6cbb1.ngrok.io/upload/",
+          data: {
+            uid: this.state.uid,
+            rid: this.state.rrid,
+            type: "src",
+            filename: "src.mp4",
+          },
+        })
+          .then((response) => {
+            this.setState({
+              srcVidcheck: response.data,
+              srcbuttontext: "waiting for Destination Video to upload",
+              dstbuttontext: "Select Destination Video",
+              srccanselect: false,
+              dstcanselect: true,
+            });
+            if (response.data.status === "Safe") {
+              this.setState({
+                srcok: true,
+              });
+            } else {
+              this.setState({
+                srcok: false,
+              });
+            }
+            if (this.state.srcok && this.state.dstok) {
+              this.setState({
+                sendok: true,
+              });
+            }
+            console.log(response.data);
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
       }
 
       console.log(result);
@@ -132,7 +156,7 @@ export default class SelectScreen extends React.Component {
     }
   };
 
-  _pickVideo = async () => {
+  _pickdstVid = async () => {
     try {
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Videos,
@@ -141,8 +165,49 @@ export default class SelectScreen extends React.Component {
         quality: 1,
       });
       if (!result.cancelled) {
-        this.setState({ videoSource: result.uri });
-        this.uploadVideoAsync(this.state.videoSource);
+        this.setState({
+          dstVidsource: result.uri,
+          srccanselect: false,
+          srcbuttontext: "waiting for source Video to upload",
+        });
+        await this.uploaddstVidAsync(this.state.dstVidsource);
+        axios({
+          method: "post",
+          url: "http://5aa8bdd6cbb1.ngrok.io/upload/",
+          data: {
+            uid: this.state.uid,
+            rid: this.state.rrid,
+            type: "dst",
+            filename: "dst.mp4",
+          },
+        })
+          .then((response) => {
+            this.setState({
+              dstVidcheck: response.data,
+              srcbuttontext: "Select Source Video",
+              dstbuttontext: "waiting for source Video to upload",
+              srccanselect: true,
+              dstcanselect: false,
+            });
+            if (response.data.status === "Safe") {
+              this.setState({
+                dstok: true,
+              });
+            } else {
+              this.setState({
+                dstok: false,
+              });
+            }
+            if (this.state.srcok && this.state.dstok) {
+              this.setState({
+                sendok: true,
+              });
+            }
+            console.log(response.data);
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
       }
 
       console.log(result);
@@ -151,42 +216,22 @@ export default class SelectScreen extends React.Component {
     }
   };
 
-  firedbsetting() {
+  async firedbsetting() {
     var path = this.state.uid;
     const dbh = firebase.firestore();
     dbh
       .collection("users")
-      .doc("7JSR5mh50XQ83mgt4FhKeBeWxRl1")
+      .doc(this.state.uid)
       .collection("rid")
-      .doc("91dbc50e37edac95729d7bca31bd07")
+      .doc(this.state.rrid)
       .set({
-        name: "abc",
-        status: "ongoing",
+        name: this.state.output,
       })
       .then(() => {
         console.log("success!");
       })
       .catch((error) => {
         console.log(error);
-      });
-  }
-
-  getd() {
-    const dbh = firebase.firestore();
-    var arr = [];
-    dbh
-      .collection("users")
-      .doc("7JSR5mh50XQ83mgt4FhKeBeWxRl1")
-      .collection("rid")
-      .get()
-      .then(function (querySnapshot) {
-        querySnapshot.forEach(function (doc) {
-          arr.push(doc.data());
-        });
-        console.log(arr);
-      })
-      .catch(function (error) {
-        console.log("Error getting documents: ", error);
       });
   }
 
@@ -202,105 +247,195 @@ export default class SelectScreen extends React.Component {
         this.setState({
           rrid: response.data.rid,
         });
-        console.log(response.data.rid);
       })
       .catch(function (error) {
         console.log(error);
       });
   }
 
-  conNsub() {
-    //this.uploadPhotoAsync(this.state.ImageSource);
-    //this.uploadVideoAsync(this.state.videoSource);
-    //this.props.navigation.navigate("Main");
-    //this.firedbsetting();
+  async conNsub() {
+    await axios({
+      method: "post",
+      url: "http://5aa8bdd6cbb1.ngrok.io/media/",
+      data: {
+        uid: this.state.uid,
+        rid: this.state.rrid,
+        name: this.state.output,
+      },
+    })
+      .then((response) => {
+        console.log(response);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    this.props.navigation.navigate("Main");
     //this.getd();
   }
 
+  async CheckPorn() {
+    if (this.state.srcVidcheck != null && this.state.dstVidcheck != null) {
+      if (
+        this.state.srcVidcheck.status == "Safe" &&
+        this.state.srcVidcheck.status == "Safe"
+      ) {
+        alert("contents safe ready to convert");
+      } else {
+        this.setState({
+          selectscreen: false,
+        });
+      }
+    } else {
+      alert("Please Select the source and destination video");
+    }
+  }
+
   render() {
-    return (
-      <View style={styles.container}>
-        <TouchableOpacity
-          style={styles.backbutton}
-          onPress={() => {
-            this.props.navigation.navigate("Main");
-          }}
-        >
-          <View style={styles.titleBar}>
-            <AntDesign name="back" size={28} color="#52575D" />
-          </View>
-        </TouchableOpacity>
-        <View
-          style={[
-            styles.section,
-            styles.select,
-            { borderBottomColor: this.state.color },
-          ]}
-        >
-          <Video
-            source={{ uri: this.state.ImageSource }}
-            rate={1.0}
-            volume={1.0}
-            isMuted={false}
-            resizeMode="cover"
-            shouldPlay
-            isLooping
-            style={{ width: "70%", height: 150, marginLeft: 50 }}
-          />
+    if (this.state.selectscreen) {
+      return (
+        <View style={styles.container}>
           <TouchableOpacity
-            style={[styles.selectbutton, { backgroundColor: this.state.color }]}
-            onPress={this._pickImage}
-          >
-            <Entypo name="image" size={24} color={colors.blue} />
-            <Text style={{ color: colors.blue, marginHorizontal: 10 }}>
-              Select Image
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <View
-          style={[
-            styles.section,
-            styles.select,
-            { borderBottomColor: this.state.color },
-          ]}
-        >
-          <Video
-            source={{ uri: this.state.videoSource }}
-            rate={1.0}
-            volume={1.0}
-            isMuted={false}
-            resizeMode="cover"
-            shouldPlay
-            isLooping
-            style={{ width: "70%", height: 150, marginLeft: 50 }}
-          />
-          <TouchableOpacity
-            style={[styles.selectbutton, { backgroundColor: this.state.color }]}
-            onPress={this._pickVideo}
-          >
-            <Entypo name="video" size={24} color={colors.blue} />
-            <Text style={{ color: colors.blue, marginHorizontal: 10 }}>
-              Select Video
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <KeyboardAvoidingView style={[styles.section, styles.footer]}>
-          <TextInput
-            style={[styles.input, { borderColor: this.state.color }]}
-            onChangeText={this.handleoutputname}
-            placeholder="Output file name"
-          />
-          <TouchableOpacity
-            style={[styles.button, { backgroundColor: this.state.color }]}
+            style={styles.backbutton}
             onPress={() => {
-              this.conNsub();
+              this.props.navigation.navigate("Main");
             }}
           >
-            <Text style={{ color: colors.blue }}>Convert</Text>
+            <View style={styles.titleBar}>
+              <AntDesign name="back" size={28} color="#52575D" />
+            </View>
           </TouchableOpacity>
-        </KeyboardAvoidingView>
-      </View>
-    );
+          <View style={[styles.section, styles.select]}>
+            <Video
+              source={{ uri: this.state.srcVidsource }}
+              rate={1.0}
+              volume={1.0}
+              isMuted={false}
+              resizeMode="cover"
+              shouldPlay
+              isLooping
+              style={{ width: "70%", height: 150, marginLeft: 50 }}
+            />
+            <Button
+              title={this.state.srcbuttontext}
+              disabled={!this.state.srccanselect}
+              onPress={() => {
+                this._picksrcVid();
+              }}
+            ></Button>
+          </View>
+          <View style={[styles.section, styles.select]}>
+            <Video
+              source={{ uri: this.state.dstVidsource }}
+              rate={1.0}
+              volume={1.0}
+              isMuted={false}
+              resizeMode="cover"
+              shouldPlay
+              isLooping
+              style={{ width: "70%", height: 150, marginLeft: 50 }}
+            />
+            <Button
+              title={this.state.dstbuttontext}
+              disabled={!this.state.dstcanselect}
+              onPress={() => {
+                this._pickdstVid();
+              }}
+            ></Button>
+          </View>
+          <View
+            style={[
+              styles.section,
+              {
+                flex: 1,
+                justifyContent: "center",
+                marginHorizontal: 20,
+                alignSelf: "center",
+              },
+            ]}
+          >
+            <TouchableOpacity
+              onPress={() => {
+                this.CheckPorn();
+              }}
+            >
+              <Text>Check Input Intergretiy</Text>
+            </TouchableOpacity>
+          </View>
+          <KeyboardAvoidingView style={[styles.section, styles.footer]}>
+            <TextInput
+              style={[styles.input, { borderColor: this.state.color }]}
+              onChangeText={this.handleoutputname}
+              placeholder="Output file name"
+            />
+            <Button
+              title="Convert"
+              disabled={!this.state.sendok}
+              onPress={() => {
+                this.conNsub();
+              }}
+            ></Button>
+          </KeyboardAvoidingView>
+        </View>
+      );
+    } else {
+      return (
+        <View style={styles.container}>
+          <View
+            style={{
+              flex: 1,
+              alignContent: "center",
+              alignSelf: "center",
+              marginTop: 15,
+            }}
+          >
+            <Text>Input Intergretiy</Text>
+          </View>
+          <View
+            style={{
+              flex: 1,
+              flexDirection: "row",
+              alignContent: "center",
+              justifyContent: "center",
+              alignSelf: "stretch",
+            }}
+          >
+            <View
+              style={{
+                marginHorizontal: 10,
+                borderWidth: 1,
+              }}
+            >
+              <Text>{this.state.srcVidcheck.status}</Text>
+            </View>
+            <View
+              style={{
+                marginHorizontal: 10,
+                borderWidth: 1,
+              }}
+            >
+              <Text>{this.state.dstVidcheck.status}</Text>
+            </View>
+          </View>
+          <View
+            style={{
+              flex: 1,
+              alignContent: "center",
+              alignSelf: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Button
+              title="ok"
+              onPress={() => {
+                this.setState({
+                  selectscreen: true,
+                });
+              }}
+            ></Button>
+          </View>
+        </View>
+      );
+    }
   }
 }
 
@@ -329,11 +464,11 @@ const styles = StyleSheet.create({
     left: 0,
   },
   select: {
+    flex: 3,
     justifyContent: "flex-end",
     marginHorizontal: 20,
   },
   section: {
-    flex: 1,
     alignSelf: "stretch",
   },
   input: {
@@ -347,9 +482,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   footer: {
+    flex: 1,
     paddingHorizontal: 20,
     flexDirection: "row",
     alignItems: "center",
+    marginBottom: 40,
+    justifyContent: "center",
   },
   selectbutton: {
     flexDirection: "row",

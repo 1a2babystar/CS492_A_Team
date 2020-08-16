@@ -8,6 +8,8 @@ import ProfileScreen from "./app/screens/ProfileScreen";
 import SelectScreen from "./app/screens/SelectScreen";
 import LoginScreen from "./app/screens/LoginScreen";
 import CreateScreen from "./app/screens/CreateScreen";
+import Intro from "./app/screens/Intro";
+//import Mainpage from "./app/screens/Mainpage";
 
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -68,6 +70,7 @@ export default class App extends React.Component {
             headerShown: false,
           }}
         >
+          <Main.Screen name="Intro" component={Intro} />
           <Main.Screen name="Login" component={LoginScreen} />
           <Main.Screen name="Select" component={SelectScreen} />
           <Main.Screen name="Create" component={CreateScreen} />
