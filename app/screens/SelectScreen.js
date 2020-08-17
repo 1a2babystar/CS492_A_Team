@@ -7,6 +7,9 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Button,
+  Modal,
+  Animated,
+  TouchableHighlight,
 } from "react-native";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import * as ImagePicker from "expo-image-picker";
@@ -37,9 +40,14 @@ export default class SelectScreen extends React.Component {
       dstok: false,
       sendok: false,
       srccanselect: true,
-      dstcanselect: true,
-      srcbuttontext: "Select Source Video",
-      dstbuttontext: "Select Destination Video",
+      dstcanselect: false,
+      srcbuttontext: "Select Video for Face",
+      dstbuttontext: "Select Video for Body",
+      check: "",
+      isVisible1: false,
+      isVisible2: false,
+      modalVisible1: false,
+      modalVisible2: false,
     };
 
     this.handleoutputname = this.handleoutputname.bind(this);
@@ -85,7 +93,9 @@ export default class SelectScreen extends React.Component {
     const blobb = await response.blob();
     this.setState({
       srccanselect: false,
+      //srcbuttontext: "Uploading Video to Server",
     });
+    console.log("blob finished");
     await firebase.storage().ref(path).put(blobb);
     return;
   };
@@ -99,6 +109,7 @@ export default class SelectScreen extends React.Component {
     await firebase.storage().ref(path).put(blobb);
     this.setState({
       dstcanselect: false,
+      //dstbuttontext: "Uploading Video to Server",
     });
     return;
   };
@@ -117,8 +128,8 @@ export default class SelectScreen extends React.Component {
           srccanselect: false,
           dstcanselect: false,
           srcbuttontext: "Checking your Video's Safety",
-          dstbuttontext: "You can upload after checking Safety",
         });
+        console.log("upload started");
         await this.uploadsrcVidAsync(this.state.srcVidsource);
         axios({
           method: "post",
@@ -133,24 +144,30 @@ export default class SelectScreen extends React.Component {
           .then((response) => {
             this.setState({
               srcVidcheck: response.data,
-              dstbuttontext: "Select Destination Video",
-              srccanselect: false,
               dstcanselect: true,
             });
+            console.log(this.state.rrid);
             if (response.data.status === "Safe") {
               this.setState({
                 srcok: true,
                 srcbuttontext: "Your Video is Safe!",
+                srccanselect: false,
+                dstcanselect: true,
               });
             } else {
               this.setState({
                 srcok: false,
                 srcbuttontext: "Your Video is Unsafe, choose other Video",
+                srccanselect: true,
+                dstcanselect: false,
+                check: "Why My Video is Porn?",
+                isVisible1: true,
               });
             }
+            this.renderResults();
             if (this.state.srcok) {
               this.setState({
-                srccanselect: false,
+                //srccanselect: false,
                 srcbuttontext: "Your Video is Safe!",
               });
             }
@@ -201,16 +218,21 @@ export default class SelectScreen extends React.Component {
           .then((response) => {
             this.setState({
               dstVidcheck: response.data,
+              isVisible1: false,
             });
             if (response.data.status === "Safe") {
               this.setState({
                 dstok: true,
                 dstbuttontext: "Your Video is Safe!",
+                dstcanselect: false,
               });
             } else {
               this.setState({
                 dstok: false,
                 dstbuttontext: "Your Video is Unsafe, choose other Video",
+                dstcanselect: true,
+                check: "Why My Video is Porn?",
+                isVisible2: true,
               });
             }
             if (!this.state.srcok) {
@@ -273,6 +295,7 @@ export default class SelectScreen extends React.Component {
         this.setState({
           rrid: response.data.rid,
         });
+        console.log(this.state.rrid);
       })
       .catch(function (error) {
         console.log(error);
@@ -316,26 +339,94 @@ export default class SelectScreen extends React.Component {
     }
   }
 
+  viewModal1() {
+    this.setState({
+      modalVisible1: true,
+    });
+  }
+  viewModal2() {
+    this.setState({
+      modalVisible2: true,
+    });
+  }
+  closeModal1() {
+    this.setState({
+      modalVisible1: false,
+    });
+  }
+  viewModal2() {
+    this.setState({
+      modalVisible2: false,
+    });
+  }
+
   render() {
     if (this.state.selectscreen) {
       return (
         <View style={styles.container}>
-          <TouchableOpacity
-            style={styles.backbutton}
-            onPress={() => {
-              this.props.navigation.navigate("MainPage");
+          <Modal
+            animationType="slide"
+            animationDuration={200}
+            animationTension={40}
+            closeOnTouchOutside={true}
+            modalStyle={{
+              borderRadius: 2,
+              margin: 20,
+              padding: 10,
+              backgroundColor: "#F4F5F6",
+              flex: 0.8,
             }}
+            visible={this.state.modalVisible1}
           >
-            <View style={styles.titleBar}>
-              <AntDesign name="back" size={28} color="#52575D" />
+            <View style={styles.modalfirst}>
+              <Text style={styles.ModalTitle}>Porn Video Detected!</Text>
+              <Text style={styles.ModalSubTitle}>
+                Highest Probability Frame is shown below.{"\n"} We recommend
+                choosing another video.
+              </Text>
             </View>
-          </TouchableOpacity>
+            <View style={styles.modalsecond}></View>
+            <View style={styles.modalthird}>
+              <TouchableOpacity
+                onPress={() => {
+                  this.closeModal1();
+                }}
+              >
+                <Text style={styles.buttonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </Modal>
+          <Modal
+            animationType="slide"
+            overlayStyle={{
+              backgroundColor: "rgba(0, 0, 0, 0.75)",
+            }}
+            animationDuration={200}
+            animationTension={40}
+            closeOnTouchOutside={true}
+            modalStyle={{
+              borderRadius: 2,
+              margin: 20,
+              padding: 10,
+              backgroundColor: "#F5F5F5",
+            }}
+            visible={this.state.modalVisible2}
+          >
+            <Text>Hello World!</Text>
+            <TouchableOpacity
+              onPress={() => {
+                this.closeModal2();
+              }}
+            >
+              <Text style={styles.buttonText}>Close</Text>
+            </TouchableOpacity>
+          </Modal>
           <View style={[styles.section, styles.select]}>
             <Video
               source={{ uri: this.state.srcVidsource }}
               rate={1.0}
               volume={1.0}
-              isMuted={false}
+              isMuted={true}
               resizeMode="cover"
               shouldPlay
               isLooping
@@ -353,6 +444,7 @@ export default class SelectScreen extends React.Component {
               color="#2D31AC"
               onPress={() => {
                 this._picksrcVid();
+                //<NineCubesLoader />;
               }}
             ></Button>
           </View>
@@ -361,7 +453,7 @@ export default class SelectScreen extends React.Component {
               source={{ uri: this.state.dstVidsource }}
               rate={1.0}
               volume={1.0}
-              isMuted={false}
+              isMuted={true}
               resizeMode="cover"
               shouldPlay
               isLooping
@@ -394,10 +486,11 @@ export default class SelectScreen extends React.Component {
           >
             <TouchableOpacity
               onPress={() => {
-                this.CheckPorn();
+                this.state.isVisible1 ? this.viewModal1() : null;
+                this.state.isVisible2 ? this.viewModal2() : null;
               }}
             >
-              <Text>Check Input Intergretiy</Text>
+              <Text style={styles.porn}>{this.state.check}</Text>
             </TouchableOpacity>
           </View>
           <KeyboardAvoidingView style={[styles.section, styles.footer]}>
@@ -427,7 +520,7 @@ export default class SelectScreen extends React.Component {
               marginTop: 15,
             }}
           >
-            <Text>Input Intergretiy</Text>
+            <Text>{this.state.check}</Text>
           </View>
           <View
             style={{
@@ -557,5 +650,43 @@ const styles = StyleSheet.create({
     alignContent: "center",
     justifyContent: "center",
     alignSelf: "stretch",
+  },
+  porn: {
+    fontSize: 15,
+    fontWeight: "bold",
+    color: "red",
+  },
+  box: {
+    marginTop: 100,
+    borderRadius: 30,
+    backgroundColor: "red",
+    alignSelf: "stretch",
+    marginHorizontal: 30,
+    height: 500,
+  },
+  buttonText: {
+    fontSize: 24,
+    color: "#00479e",
+    textAlign: "center",
+  },
+  ModalTitle: {
+    marginTop: 20,
+    textAlign: "center",
+    fontSize: 30,
+    color: "black",
+    fontWeight: "bold",
+  },
+  ModalSubTitle: {
+    fontSize: 15,
+    textAlign: "center",
+  },
+  modalfirst: {
+    flex: 2,
+  },
+  modalsecond: {
+    flex: 3,
+  },
+  modalthird: {
+    flex: 1,
   },
 });

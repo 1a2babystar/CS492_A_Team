@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { Text, StyleSheet, View, Image, TouchableOpacity } from "react-native";
-import LinearGradient from "expo-linear-gradient";
 import firebase from "firebase";
 
 export default class Mainpage extends Component {
@@ -8,8 +7,71 @@ export default class Mainpage extends Component {
     super(props);
 
     this.state = {
+      time: null,
+      numofreq: null,
       username: "",
     };
+  }
+
+  async componentDidMount() {
+    this.focusListener = this.props.navigation.addListener(
+      "focus",
+      async () => {
+        var user = firebase.auth().currentUser;
+        if (user != null) {
+          firebase
+            .firestore()
+            .collection("users")
+            .doc(user.uid)
+            .onSnapshot((doc) => {
+              var timearr = doc.data().time.split("-").map(Number);
+              var uploadsec =
+                timearr[0] * 24 * 60 * 60 +
+                timearr[1] * 60 * 60 +
+                timearr[2] * 60 +
+                timearr[3];
+              var nowsec =
+                new Date().getDate() * 24 * 60 * 60 +
+                new Date().getHours() * 60 * 60 +
+                new Date().getMinutes() * 60 +
+                new Date().getSeconds();
+              var intervalsec = nowsec - uploadsec;
+              var remainder = intervalsec;
+              var numday = Math.floor(remainder / (24 * 60 * 60));
+              remainder = remainder % (24 * 60 * 60);
+              var numhour = Math.floor(remainder / (60 * 60));
+              remainder = remainder % (60 * 60);
+              var numminute = Math.floor(remainder / 60);
+              remainder = remainder % 60;
+              var numsecond = remainder;
+              var timestring =
+                numday +
+                "days " +
+                numhour +
+                "hours " +
+                numminute +
+                "minutes " +
+                numsecond +
+                "seconds passed";
+              console.log(timestring);
+              this.setState({
+                time: timestring,
+              });
+            });
+          firebase
+            .firestore()
+            .collection("users")
+            .doc(user.uid)
+            .collection("history")
+            .get()
+            .then((res) => {
+              this.setState({
+                numofreq: res.size,
+              });
+            });
+        }
+      }
+    );
   }
 
   render() {
@@ -44,8 +106,17 @@ export default class Mainpage extends Component {
               Process Duration
             </Text>
             <Text style={styles.dd}>
-              <Text style={styles.inside1}>Time </Text>
-              <Text style={styles.inside2}>4:23:07</Text>
+              <Text style={styles.inside1}>Time: </Text>
+              <Text
+                style={{
+                  bottom: 24,
+                  fontSize: 20,
+                  left: 180,
+                  paddingRight: 15,
+                }}
+              >
+                {this.state.time}
+              </Text>
             </Text>
           </View>
         </View>
@@ -59,7 +130,8 @@ export default class Mainpage extends Component {
             >
               History
             </Text>
-            <Text style={styles.num}> number of request </Text>
+            <Text style={styles.num}>number of request: </Text>
+            <Text style={styles.num}> {this.state.numofreq} </Text>
           </View>
           <TouchableOpacity
             onPress={() => {
