@@ -398,7 +398,7 @@ export default class SelectScreen extends React.Component {
       modalVisible1: false,
     });
   }
-  viewModal2() {
+  closeModal2() {
     this.setState({
       modalVisible2: false,
     });
@@ -417,7 +417,7 @@ export default class SelectScreen extends React.Component {
               borderRadius: 2,
               margin: 20,
               padding: 10,
-              backgroundColor: "#F4F5F6",
+              backgroundColor: "white",
               flex: 0.8,
             }}
             visible={this.state.modalVisible1}
@@ -434,7 +434,7 @@ export default class SelectScreen extends React.Component {
                 source={{ uri: this.state.pornsrc }}
                 style={{
                   width: "80%",
-                  height: 160,
+                  height: "60%",
                   marginHorizontal: 30,
                   marginBottom: 10,
                 }}
@@ -476,7 +476,7 @@ export default class SelectScreen extends React.Component {
                 source={{ uri: this.state.pornsrc }}
                 style={{
                   width: "80%",
-                  height: 160,
+                  height: "60%",
                   marginHorizontal: 30,
                   marginBottom: 10,
                 }}
@@ -503,7 +503,7 @@ export default class SelectScreen extends React.Component {
               isLooping
               style={{
                 width: "80%",
-                height: 160,
+                height: 200,
                 marginHorizontal: 30,
                 marginBottom: 10,
               }}
@@ -530,7 +530,7 @@ export default class SelectScreen extends React.Component {
               isLooping
               style={{
                 width: "80%",
-                height: 160,
+                height: 200,
                 marginHorizontal: 30,
                 marginBottom: 10,
               }}
@@ -557,8 +557,8 @@ export default class SelectScreen extends React.Component {
           >
             <TouchableOpacity
               onPress={() => {
-                this.state.isVisible1 ? this.viewModal1() : null;
                 this.state.isVisible2 ? this.viewModal2() : null;
+                this.state.isVisible1 ? this.viewModal1() : null;
               }}
             >
               <Text style={styles.porn}>{this.state.check}</Text>
@@ -660,12 +660,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "500",
   },
-  backbutton: {
-    flex: 1,
-    position: "absolute",
-    top: 0,
-    left: 0,
-  },
+
   select: {
     flex: 3,
     justifyContent: "flex-end",
@@ -741,18 +736,20 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   ModalTitle: {
-    marginTop: 20,
+    marginTop: 60,
     textAlign: "center",
     fontSize: 30,
     color: "black",
     fontWeight: "bold",
+    marginBottom: 15,
   },
   ModalSubTitle: {
     fontSize: 15,
     textAlign: "center",
   },
   modalfirst: {
-    flex: 2,
+    flex: 1,
+    paddingVertical: 30,
   },
   modalsecond: {
     flex: 3,
