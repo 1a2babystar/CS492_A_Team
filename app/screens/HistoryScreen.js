@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   FlatList,
 } from "react-native";
+import clr from "../config/clr";
 import firebase from "firebase";
 import HistoryList from "../../components/HistoryList";
 
@@ -58,7 +59,7 @@ export default class HistoryScreen extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <View style={{ flex: 1, alignSelf: "center" }}>
+        <View style={styles.toplayer}>
           <Text style={styles.title}>History</Text>
         </View>
         <View style={styles.middlelayer}>
@@ -93,10 +94,18 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFF",
   },
+  toplayer: {
+    flex: 2,
+    alignSelf: "center",
+    textAlign: "center",
+    alignItems: "center",
+    marginTop: 80,
+  },
   ongoingbox: {
     width: "100%",
     paddingHorizontal: 10,
-    marginBottom: 50,
+    bottom: 100,
+    marginBottom: 100,
   },
   middlelayer: {
     flex: 4,
@@ -104,8 +113,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-evenly",
   },
   title: {
-    marginTop: 130,
-    fontSize: 30,
+    marginTop: 30,
+    fontSize: 40,
     fontWeight: "bold",
     color: "black",
     paddingHorizontal: 20,

@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Button,
   Modal,
+  Image,
   Animated,
   TouchableHighlight,
 } from "react-native";
@@ -20,6 +21,7 @@ import firebase from "firebase";
 import "firebase/firestore";
 import Constants from "expo-constants";
 import axios from "axios";
+import * as FileSystem from "expo-file-system";
 import { LinearGradient } from "expo-linear-gradient";
 import { getFreeDiskStorageAsync } from "expo-file-system";
 import { DarkTheme } from "@react-navigation/native";
@@ -48,6 +50,7 @@ export default class SelectScreen extends React.Component {
       isVisible2: false,
       modalVisible1: false,
       modalVisible2: false,
+      pornsrc: null,
     };
 
     this.handleoutputname = this.handleoutputname.bind(this);
@@ -141,7 +144,7 @@ export default class SelectScreen extends React.Component {
             filename: "src.mp4",
           },
         })
-          .then((response) => {
+          .then(async (response) => {
             this.setState({
               srcVidcheck: response.data,
               dstcanselect: true,
@@ -163,8 +166,28 @@ export default class SelectScreen extends React.Component {
                 check: "Why My Video is Porn?",
                 isVisible1: true,
               });
+              var path =
+                "/users/" +
+                this.state.uid +
+                "/" +
+                this.state.rrid +
+                "/nsfw.jpg";
+              const url = await firebase.storage().ref(path).getDownloadURL();
+              console.log("downloaduri: ", url);
+              FileSystem.downloadAsync(
+                url,
+                FileSystem.documentDirectory + "nsfw.jpg"
+              )
+                .then(async ({ uri }) => {
+                  this.setState({
+                    pornsrc: uri,
+                  });
+                  console.log("uuuuuuuuuuuri:", this.state.pornsrc);
+                })
+                .catch((error) => {
+                  console.error(error);
+                });
             }
-            this.renderResults();
             if (this.state.srcok) {
               this.setState({
                 //srccanselect: false,
@@ -215,7 +238,7 @@ export default class SelectScreen extends React.Component {
             filename: "dst.mp4",
           },
         })
-          .then((response) => {
+          .then(async (response) => {
             this.setState({
               dstVidcheck: response.data,
               isVisible1: false,
@@ -234,6 +257,27 @@ export default class SelectScreen extends React.Component {
                 check: "Why My Video is Porn?",
                 isVisible2: true,
               });
+              var path =
+                "/users/" +
+                this.state.uid +
+                "/" +
+                this.state.rrid +
+                "/nsfw.jpg";
+              const url = await firebase.storage().ref(path).getDownloadURL();
+              console.log("downloaduri: ", url);
+              FileSystem.downloadAsync(
+                url,
+                FileSystem.documentDirectory + "nsfw.jpg"
+              )
+                .then(async ({ uri }) => {
+                  this.setState({
+                    pornsrc: uri,
+                  });
+                  console.log("uuuuuuuuuuuri:", this.state.pornsrc);
+                })
+                .catch((error) => {
+                  console.error(error);
+                });
             }
             if (!this.state.srcok) {
               this.setState({
@@ -385,7 +429,17 @@ export default class SelectScreen extends React.Component {
                 choosing another video.
               </Text>
             </View>
-            <View style={styles.modalsecond}></View>
+            <View style={styles.modalsecond}>
+              <Image
+                source={{ uri: this.state.pornsrc }}
+                style={{
+                  width: "80%",
+                  height: 160,
+                  marginHorizontal: 30,
+                  marginBottom: 10,
+                }}
+              />
+            </View>
             <View style={styles.modalthird}>
               <TouchableOpacity
                 onPress={() => {
@@ -398,9 +452,6 @@ export default class SelectScreen extends React.Component {
           </Modal>
           <Modal
             animationType="slide"
-            overlayStyle={{
-              backgroundColor: "rgba(0, 0, 0, 0.75)",
-            }}
             animationDuration={200}
             animationTension={40}
             closeOnTouchOutside={true}
@@ -408,18 +459,38 @@ export default class SelectScreen extends React.Component {
               borderRadius: 2,
               margin: 20,
               padding: 10,
-              backgroundColor: "#F5F5F5",
+              backgroundColor: "#F4F5F6",
+              flex: 0.8,
             }}
             visible={this.state.modalVisible2}
           >
-            <Text>Hello World!</Text>
-            <TouchableOpacity
-              onPress={() => {
-                this.closeModal2();
-              }}
-            >
-              <Text style={styles.buttonText}>Close</Text>
-            </TouchableOpacity>
+            <View style={styles.modalfirst}>
+              <Text style={styles.ModalTitle}>Porn Video Detected!</Text>
+              <Text style={styles.ModalSubTitle}>
+                Highest Probability Frame is shown below.{"\n"} We recommend
+                choosing another video.
+              </Text>
+            </View>
+            <View style={styles.modalsecond}>
+              <Image
+                source={{ uri: this.state.pornsrc }}
+                style={{
+                  width: "80%",
+                  height: 160,
+                  marginHorizontal: 30,
+                  marginBottom: 10,
+                }}
+              />
+            </View>
+            <View style={styles.modalthird}>
+              <TouchableOpacity
+                onPress={() => {
+                  this.closeModal2();
+                }}
+              >
+                <Text style={styles.buttonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
           </Modal>
           <View style={[styles.section, styles.select]}>
             <Video

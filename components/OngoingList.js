@@ -10,7 +10,6 @@ import * as MediaLibrary from "expo-media-library";
 async function Down(uid, rid, name) {
   const path = "/users/" + uid + "/" + rid + "/result/test.mp4";
   const url = await firebase.storage().ref(path).getDownloadURL();
-  console.log(url);
   FileSystem.downloadAsync(url, FileSystem.documentDirectory + name)
     .then(async ({ uri }) => {
       MediaLibrary.saveToLibraryAsync(uri);

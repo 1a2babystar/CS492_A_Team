@@ -37,22 +37,13 @@ export default class Mainpage extends Component {
                 new Date().getSeconds();
               var intervalsec = nowsec - uploadsec;
               var remainder = intervalsec;
-              var numday = Math.floor(remainder / (24 * 60 * 60));
-              remainder = remainder % (24 * 60 * 60);
+
               var numhour = Math.floor(remainder / (60 * 60));
               remainder = remainder % (60 * 60);
               var numminute = Math.floor(remainder / 60);
               remainder = remainder % 60;
               var numsecond = remainder;
-              var timestring =
-                numday +
-                "days " +
-                numhour +
-                "hours " +
-                numminute +
-                "minutes " +
-                numsecond +
-                "seconds passed";
+              var timestring = numhour + " hours " + numminute + " min";
               console.log(timestring);
               this.setState({
                 time: timestring,
@@ -84,6 +75,9 @@ export default class Mainpage extends Component {
           <Image
             source={require("../Images/Avatar.jpg")}
             style={styles.avatar}
+            onPress={() => {
+              this.props.navigation.navigate("Profile");
+            }}
           />
           <Text
             style={styles.Username}
@@ -103,16 +97,25 @@ export default class Mainpage extends Component {
                 this.props.navigation.navigate("Ongoing");
               }}
             >
-              Process Duration
+              Requests
             </Text>
+
             <Text style={styles.dd}>
-              <Text style={styles.inside1}>Time: </Text>
+              <Text
+                style={styles.inside1}
+                onPress={() => {
+                  this.props.navigation.navigate("Ongoing");
+                }}
+              >
+                Time Spent :{" "}
+              </Text>
               <Text
                 style={{
                   bottom: 24,
                   fontSize: 20,
                   left: 180,
                   paddingRight: 15,
+                  fontWeight: "bold",
                 }}
               >
                 {this.state.time}
@@ -130,8 +133,10 @@ export default class Mainpage extends Component {
             >
               History
             </Text>
-            <Text style={styles.num}>number of request: </Text>
-            <Text style={styles.num}> {this.state.numofreq} </Text>
+            <Text style={styles.his}>
+              <Text style={styles.num}>Number of Request : </Text>
+              <Text style={styles.num1}> {this.state.numofreq} </Text>
+            </Text>
           </View>
           <TouchableOpacity
             onPress={() => {
@@ -157,7 +162,7 @@ const styles = StyleSheet.create({
   //second layer
 
   avatar: {
-    marginLeft: 20,
+    alignSelf: "center",
   },
 
   toplayer: {
@@ -175,7 +180,7 @@ const styles = StyleSheet.create({
   },
 
   Username: {
-    top: 30,
+    marginTop: 20,
     fontSize: 30,
     textAlign: "center",
     marginBottom: 20,
@@ -196,8 +201,9 @@ const styles = StyleSheet.create({
     height: "80%",
   },
   ongoing: {
-    padding: 15,
-    left: 55,
+    paddingVertical: 15,
+    fontWeight: "bold",
+    marginLeft: 30,
     fontSize: 25,
   },
   big_rectangle: {
@@ -209,9 +215,10 @@ const styles = StyleSheet.create({
     height: "70%",
   },
   history: {
-    fontSize: 30,
-    padding: 15,
+    fontSize: 25,
+    paddingVertical: 15,
     left: 25,
+    fontWeight: "bold",
   },
   lastweek: {
     fontSize: 15,
@@ -221,8 +228,7 @@ const styles = StyleSheet.create({
   inside1: {
     marginLeft: 30,
     fontSize: 20,
-    color: "gray",
-    textAlign: "center",
+    color: "black",
   },
   inside2: {
     bottom: 24,
@@ -251,5 +257,20 @@ const styles = StyleSheet.create({
   num: {
     fontSize: 20,
     marginLeft: 30,
+  },
+  num1: {
+    fontSize: 20,
+    marginLeft: 30,
+    fontWeight: "bold",
+  },
+  his: {
+    flexDirection: "row",
+    marginLeft: 30,
+  },
+  uu: {
+    color: "gray",
+    fontSize: 15,
+    marginLeft: 30,
+    paddingVertical: 5,
   },
 });

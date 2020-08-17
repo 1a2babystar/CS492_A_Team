@@ -23,7 +23,7 @@ async function Down(uid, rid, name) {
 
 export default HistoryList = ({ list }) => {
   return (
-    <View style={[styles.listContainer, { backgroundColor: "grey" }]}>
+    <View style={[styles.listContainer, { backgroundColor: list.color }]}>
       <View style={styles.first}>
         <Text style={styles.listTitle} numberOfLines={1}>
           {list.name}
@@ -62,8 +62,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   listContainer: {
-    borderWidth: 1,
-    borderBottomColor: "black",
     flexDirection: "row",
     paddingVertical: 10,
     alignItems: "center",
