@@ -44,7 +44,10 @@ export default class Intro extends Component {
               </TouchableOpacity>
             </View>
             <View style={{ width, height }}>
-              <Image style={styles.imageStyle} />
+              <Image
+                source={require("../Images/a1.png")}
+                style={styles.imageStyle}
+              />
               <View style={styles.wrapper}>
                 <Text style={styles.header}>High quality of FaceSwap</Text>
                 <Text style={styles.paragraph}>Based on DeepLearning</Text>
@@ -59,7 +62,10 @@ export default class Intro extends Component {
               </TouchableOpacity>
             </View>
             <View style={{ width, height }}>
-              <Image style={styles.imageStyle} />
+              <Image
+                source={require("../Images/a2.png")}
+                style={styles.imageStyle}
+              />
               <View style={styles.wrapper}>
                 <Text style={styles.header}>Provide Porn Detection</Text>
                 <Text style={styles.paragraph}>
@@ -125,6 +131,10 @@ const styles = StyleSheet.create({
   },
   imageStyle: {
     flex: 3,
+    width: "70%",
+    height: "100%",
+    alignSelf: "center",
+    marginTop: 60,
   },
   button_signin: {
     flex: 1,

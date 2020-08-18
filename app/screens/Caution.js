@@ -9,10 +9,14 @@ export default class Caution extends Component {
           <View style={styles.cautionbox}>
             <Text style={styles.title}> Caution </Text>
             <Text style={styles.content}>
-              This application only supports proper video synthesis. {"\n"}{" "}
+              This application only supports {"\n"} proper video synthesis.{" "}
+              {"\n"} {"\n"}
+              Therefore, requests for synthesis {"\n"} using videos classified
+              as {"\n"}
+              pornography may be rejected {"\n"} at any time. {"\n"}
               {"\n"}
-              Therefore, requests for synthesis using videos classified as
-              pornography may be rejected at any time.{" "}
+              You can choose Videos for {"\n"} Face and Body Source.{"\n"}
+              Both Videos can be checked by {"\n"} our Detection Server. {"\n"}
             </Text>
           </View>
         </View>
@@ -57,7 +61,7 @@ const styles = StyleSheet.create({
   },
   content: {
     marginHorizontal: 20,
-    fontSize: 18,
+    fontSize: 20,
     marginTop: 30,
   },
   buttonL: {

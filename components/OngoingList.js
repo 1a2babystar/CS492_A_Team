@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     width: 150,
     borderWidth: 1,
-    padding: 8,
+    padding: 2,
     borderColor: "white",
     borderRadius: 10,
     flexDirection: "row",

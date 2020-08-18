@@ -140,7 +140,7 @@ export default class Mainpage extends Component {
           </View>
           <TouchableOpacity
             onPress={() => {
-              this.props.navigation.navigate("Select");
+              this.props.navigation.navigate("Caution");
             }}
             style={styles.buttonL}
           >
